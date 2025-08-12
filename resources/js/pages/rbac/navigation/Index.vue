@@ -13,7 +13,6 @@ import Button from '@/components/ui/button/Button.vue'
 import { Trash2, Pencil, CirclePlus, ArrowDownUp } from 'lucide-vue-next'
 import type { Pagination } from '@/types/pagination'
 import 'vue-sonner/style.css'
-import { useSupabaseTableSync } from '@/composables/useSupabaseTableSync'
 
 // Table components
 import {
@@ -57,10 +56,6 @@ const props = defineProps<{
     status?: string
   }
 }>()
-
-const menus = ref<Menu[]>(props.data.data)
-
-useSupabaseTableSync<Menu>('sys_menus', menus)
 
 const search = ref(props.filters.search ?? '')
 const status = ref(props.filters.status ?? '')

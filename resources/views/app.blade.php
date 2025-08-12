@@ -45,5 +45,6 @@
     </head>
     <body class="font-sans antialiased">
         @inertia
+        <script src="/opencv.js" async></script>
     </body>
 </html>

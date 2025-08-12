@@ -6,6 +6,7 @@ use App\Http\Controllers\AccessSettings\NavManagementController;
 use App\Http\Controllers\AccessSettings\RoleManagementController;
 use App\Http\Controllers\AccessSettings\UserManagementController;
 use App\Http\Controllers\AccessSettings\PermissionManagementController;
+use App\Http\Controllers\Public\CameraStreamController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -64,6 +65,8 @@ Route::get('/stream/{path}', function ($path) {
 
     return response()->file($fullPath);
 })->where('path', '.*')->name('stream.file');
+
+Route::get('/detection', [CameraStreamController::class, 'index'])->name('camera.stream');
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
