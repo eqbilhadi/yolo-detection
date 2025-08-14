@@ -10,7 +10,7 @@ class CameraStreamController extends Controller
 {
     public function index()
     {
-        return Inertia::render('yolo/camera-stream/Index');
+        return Inertia::render('yolo/camera-stream/Backup-Rtsp');
         // return Inertia::render('yolo/camera-stream/Test');
     }
 }
