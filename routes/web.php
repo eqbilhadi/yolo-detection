@@ -67,6 +67,6 @@ Route::get('/stream/{path}', function ($path) {
 })->where('path', '.*')->name('stream.file');
 
 Route::get('/detection', [CameraStreamController::class, 'index'])->name('camera.stream');
-
+Route::post('/detection', [CameraStreamController::class, 'store'])->name('camera.store');
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

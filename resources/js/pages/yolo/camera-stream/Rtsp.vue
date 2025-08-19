@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import * as model_loader from "@/utils/model_loader";
 import { inference_pipeline } from "@/utils/inference_pipeline";
 import { draw_bounding_boxes } from "@/utils/draw_bounding_boxes";
+import { saveDetections } from "@/utils/save_detection";
 import classes from "@/utils/yolo_classes.json";
 
 // --- Konfigurasi Model & Inferensi ---
@@ -60,6 +61,9 @@ const openImageBtnText = computed(() => (imgSrc.value ? "Close Image" : "Open Im
 const openCameraBtnText = computed(() => (isCameraRunning.value ? "Close Camera" : "Open Camera"));
 const modelStatusColor = computed(() => (isModelLoaded.value ? "text-green-500" : "text-red-500"));
 
+let lastSent = 0;
+const interval = 2000;
+
 // --- Logika Utama ---
 
 /**
@@ -95,7 +99,7 @@ const loadModel = async () => {
 const getCameras = async () => {
   try {
     const customCameras = [{
-      deviceId: "wss://publishers-empire-ru-tones.trycloudflare.com",
+      deviceId: "wss://cartoon-retrieve-pike-competitions.trycloudflare.com",
       label: "IP Camera (Stream)",
       kind: "videoinput",
     }];
@@ -121,6 +125,8 @@ const handleImageLoad = async () => {
   details.value = results;
   inferenceTime.value = results_inferenceTime;
   draw_bounding_boxes(results, overlayRef.value);
+  // Simpan Hasil Deteksi
+  await saveDetections(results, classes, imgRef, 0.8);
 };
 
 /**
@@ -149,15 +155,15 @@ const runDetectionLoop = async (sourceElement) => {
   // PENANGANAN KHUSUS: Webcam perlu disalin ke kanvas perantara.
   // IP Camera (JSMpeg) tidak bisa, karena masalah keamanan "Tainted Canvas".
   // Jadi, untuk JSMpeg, kita langsung gunakan kanvasnya.
-  // if (sourceElement.tagName === 'VIDEO') {
-    const ctx = inputCanvasRef.value.getContext("2d");
+  if (sourceElement.tagName === 'VIDEO') {
+    const ctx = inputCanvasRef.value.getContext("2d", { willReadFrequently: true });
     if (ctx.canvas.width !== sourceWidth || ctx.canvas.height !== sourceHeight) {
       ctx.canvas.width = sourceWidth;
       ctx.canvas.height = sourceHeight;
     }
     ctx.drawImage(sourceElement, 0, 0, sourceWidth, sourceHeight);
     inferenceInput = inputCanvasRef.value;
-  // }
+  }
 
   const [results, results_inferenceTime] = await inference_pipeline(inferenceInput, sessionsConfig.value);
 
@@ -166,6 +172,12 @@ const runDetectionLoop = async (sourceElement) => {
   details.value = results;
   inferenceTime.value = results_inferenceTime;
   draw_bounding_boxes(results, overlayRef.value);
+  
+  const now = Date.now();
+  if (now - lastSent > interval) {
+    await saveDetections(results, classes, inputCanvasRef, 0.8);
+    lastSent = now;
+  }
 
   animationFrameId.value = requestAnimationFrame(() => runDetectionLoop(sourceElement));
 };
